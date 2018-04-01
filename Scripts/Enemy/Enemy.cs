@@ -26,6 +26,7 @@ namespace MyRPG.Characters
         [SerializeField] float shootSpeed = 1.5f;
         [SerializeField] float attackRange = 5.0f;
         [SerializeField] Weapons Weapon = null;
+        [SerializeField] GameObject m_audio = null;
         //[SerializeField] bool ShrowEnable = false;
 
         GameObject SpawnBulletPoint = null;
@@ -48,33 +49,63 @@ namespace MyRPG.Characters
         {
             if (EnemyUI != null && EnemyUISlot != null)
             {
-                enemyUI = Instantiate(EnemyUI, EnemyUISlot.transform);
-                enemyUI.transform.localPosition = Vector3.zero;  //Reset the location of HealthUI
-                EnemyHealthBar healthbar = enemyUI.GetComponentInChildren<EnemyHealthBar>();
-                healthbar.enemy = this;
-                enemyUI.transform.rotation = Quaternion.LookRotation(Camera.main.transform.forward);
-                nav = GetComponent<NavMeshAgent>();
-                nav.stoppingDistance = Stopdistance;
-                nav.updatePosition = true;
-
-                originalPosition = transform.position;
-                character = GetComponent<ThirdPersonCharacter>();
-                Player = GameObject.FindGameObjectWithTag("Player");
-                animator = GetComponent<Animator>();
-                animatorOverrideController = new AnimatorOverrideController(animator.runtimeAnimatorController);
-                animator.runtimeAnimatorController = animatorOverrideController;
-                UpdateAnimation();
+                AddHealthBar();
+                GetNav();
+                AddAnimation();
+                AddAudio();
             }
             else
             {
                 Debug.Log("Can't find EnemyUI or EnemyUISlot, Please attach them");
             }
         }
+
+
         public void Damage(int damage)
         {
             Health = Mathf.Clamp(Health - damage, 0, 100);
             OnEnemyHealthChange(Health);
         }
+
+        void AddAudio()
+        {
+            if (m_audio != null)
+            {
+                GameObject g = Instantiate(m_audio, transform);
+                g.transform.localPosition = Vector3.zero;
+            }
+        }
+
+
+         void AddAnimation()
+        {
+            originalPosition = transform.position;
+            character = GetComponent<ThirdPersonCharacter>();
+            Player = GameObject.FindGameObjectWithTag("Player");
+            animator = GetComponent<Animator>();
+            animatorOverrideController = new AnimatorOverrideController(animator.runtimeAnimatorController);
+            animator.runtimeAnimatorController = animatorOverrideController;
+            UpdateAnimation();
+        }
+
+         void GetNav()
+        {
+            nav = GetComponent<NavMeshAgent>();
+            nav.stoppingDistance = Stopdistance;
+            nav.updatePosition = true;
+        }
+
+         void AddHealthBar()
+        {
+            enemyUI = Instantiate(EnemyUI, EnemyUISlot.transform);
+            enemyUI.transform.localPosition = Vector3.zero;  //Reset the location of HealthUI
+            EnemyHealthBar healthbar = enemyUI.GetComponentInChildren<EnemyHealthBar>();
+            healthbar.enemy = this;
+            enemyUI.transform.rotation = Quaternion.LookRotation(Camera.main.transform.forward);
+        }
+
+
+
 
         void UpdateAnimation()
         {
@@ -141,7 +172,7 @@ namespace MyRPG.Characters
         IEnumerator EnemyAttack()
         {
             animator.SetTrigger("Attack");
-                        animator.SetFloat("Forward", 0);
+            animator.SetFloat("Forward", 0);
             animator.SetFloat("Turn", 0);
             yield return new WaitForSeconds(attackInterval);
             AttackEnable = true;
@@ -155,10 +186,10 @@ namespace MyRPG.Characters
         void ThrowBall()
         {
             Vector3 targetPosition = Player.transform.position + new Vector3(0, .8f, 0);
-            Transform SpawnTransform = GetComponentInChildren<HandMark>().transform;      
+            Transform SpawnTransform = GetComponentInChildren<HandMark>().transform;
 
 
-            if(SpawnBulletPoint==null)
+            if (SpawnBulletPoint == null)
             {
                 SpawnBulletPoint = Instantiate(new GameObject("SpawnBulletPoint"), SpawnTransform.position, Quaternion.identity);
                 SpawnBulletPoint.transform.SetParent(transform);

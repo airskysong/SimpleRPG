@@ -39,7 +39,7 @@ public class HealthBar : MonoBehaviour
 
     void OnHealthChange(int Health)
     {
-        float original = healthBar.uvRect.x;
+        //float original = healthBar.uvRect.x;
         float ShowHealth = (50 - Health) * 0.01f;
         healthBar.uvRect = new Rect(ShowHealth, 0f, 1, 1);
     }

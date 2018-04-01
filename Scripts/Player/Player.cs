@@ -11,7 +11,7 @@ namespace MyRPG.Characters
     public class Player : MonoBehaviour, IDamage
     {
         [SerializeField] int MaxHealth = 100;
-        GameObject Target = null;
+        Enemy Target = null;
         CameraRaycaster raycaseter = null;
         Animator animator;
         AnimatorOverrideController animatorOverrideController;
@@ -38,7 +38,7 @@ namespace MyRPG.Characters
             raycaseter = Camera.main.GetComponentInParent<CameraRaycaster>();
             if (raycaseter != null)
             {
-                raycaseter.notifyMouseClickObservers += OnMouseClick; // observer
+                raycaseter.OnMouseOverEnemy += OnMouseClick; // observer
             }
             nav = GetComponent<NavMeshAgent>();
             animator = GetComponent<Animator>();
@@ -81,7 +81,7 @@ namespace MyRPG.Characters
             animatorOverrideController["Default Attack"] = clip;
             clip = RemoveAnimationEvent(clip);
             animator.SetFloat("AttackSpeed", clip.length / AttackInterVal);
-            
+
         }
         //Consider to Remove AnimationEvent if it existed;
         AnimationClip RemoveAnimationEvent(AnimationClip clip)
@@ -91,13 +91,11 @@ namespace MyRPG.Characters
         }
 
         //CallBack when click to enemy;
-        void OnMouseClick(RaycastHit hit, int layer)
+        void OnMouseClick(Enemy enemy)
         {
-            if (layer == Enemy)
-            {
-                Target = hit.collider.gameObject;
-                CheckEnemy();
-            }
+
+            Target = enemy;
+            CheckEnemy();
         }
 
         void CheckEnemy()

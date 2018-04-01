@@ -42,7 +42,8 @@ namespace MyRPG.Characters
 
             if (raycaseter != null)
             {
-                raycaseter.notifyMouseClickObservers += OnMouseClick; // observer
+                raycaseter.OnMouseOverPotentiallyWalkable += OnMouseClickToMove; // observer
+                raycaseter.OnMouseOverEnemy += OnMouseClickToEnemy;
             }
         }
 
@@ -67,6 +68,26 @@ namespace MyRPG.Characters
                 ProcessMouseMovement();
             }
         }
+
+        void OnMouseClickToMove(Vector3 destination)
+        {
+            if (!isDirectMovement && Input.GetMouseButton(0))
+            {
+                isMoveToEnemy = false;
+                nav.stoppingDistance = stopDistance;
+                this.destination = destination;
+            }
+        }
+
+        void OnMouseClickToEnemy(Enemy enemy)
+        {
+            if (!isDirectMovement & Input.GetMouseButton(0))
+            {
+                isMoveToEnemy = true;
+                enemyTranform = enemy.transform;
+            }
+        }
+
         private void ProcessDirectMovement()
         {
             float h = Input.GetAxis("Horizontal");
@@ -75,28 +96,6 @@ namespace MyRPG.Characters
             Vector3 Cam_forward = Vector3.Scale(Camera.main.transform.forward, new Vector3(1, 0, 1)).normalized;
             Vector3 Movement = v * Cam_forward + h * Vector3.right;
             character.Move(Movement, false, false);
-        }
-
-        void OnMouseClick(RaycastHit raycastHit, int layer)
-        {
-            if (!isDirectMovement)
-            {
-                switch (layer)
-                {
-                    case Walkable:
-                        isMoveToEnemy = false;
-                        nav.stoppingDistance = stopDistance;
-                        destination = raycastHit.point;
-                        break;
-                    case Enemy:
-                        isMoveToEnemy = true;
-                        enemyTranform = raycastHit.collider.transform;
-                        break;
-                    default:
-                        destination = transform.position;
-                        break;
-                }
-            }
         }
 
         void ProcessMouseMovement()
